@@ -1,0 +1,15 @@
+{
+  "name": "test-autorest-generators",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "pwsh ./.scripts/run.ps1",
+    "clone-repo": "pwsh ./.scripts/clone.ps1"
+  },
+  "dependencies": {
+    "@microsoft.azure/autorest.azureresourceschema": "^2.0.29",
+    "autorest": "^2.0.4283",
+    "pwsh": "^0.2.0"
+  },
+  "devDependencies": {}
+}
