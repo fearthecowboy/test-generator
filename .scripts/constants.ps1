@@ -11,6 +11,7 @@ $outputs = resolvepath $tmp/outputs
 
 $out_1 = resolvepath $outputs/original
 $out_2 = resolvepath $outputs/new
+$expected_files_dir = resolvepath $tmp/expected
 
 ## make sure the output folders are created
 mkdir -ea 0 $out_1
