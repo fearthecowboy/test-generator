@@ -1,3 +1,4 @@
+
 $ErrorActionPreference  = "stop"
 . $PSScriptRoot/shared.ps1
 . $PSScriptRoot/constants.ps1
@@ -14,7 +15,7 @@ $ErrorActionPreference  = "stop"
 & $PSScriptRoot/get-specs-repo.ps1 
 
 // get all readme.md files 
-$allreadmes = get-childitem $restSpecs\readme.md -recurse  | where { $_.FullName -match "resource.manager" }
+$allreadmes = get-childitem $restSpecs\readme.md -recurse  | Where-Object { $_.FullName -match "resource.manager" }
 
 $x =0 
 
@@ -25,7 +26,7 @@ if ($allpassed -is [String]) {
   $allpassed = @($allpassed)
 }
 
-// passed files: 
+// Files that were correctly generated in a previous run: 
 $allpassed
 
 $allreadmes | ForEach-Object {
@@ -37,79 +38,60 @@ $allreadmes | ForEach-Object {
     autorest-new $out_2/$x/py $file --python.output-folder:$out_2/$x/py
     autorest-new $out_2/$x/ts $file --typescript.output-folder:$out_2/$x/ts
     autorest-new $out_2/$x/java $file --java.output-folder:$out_2/$x/java
-    # autorest-new $out_2/$x/ruby $file --ruby.output-folder:$out_2/$x/ruby
     autorest-new $out_2/$x/ars $file --azureresourceschema.output-folder:$out_2/$x/ars
 
-    if ($allpassed -and $allpassed.Contains($x.ToString())) {
-      $actualFiles =  Get-ChildItem –Path $out_2/$x | ForEach-Object  {Get-FileHash –Path $_.FullName}
-      $expectedFiles = Get-ChildItem –Path $expected_files_dir -Filter "*.txt" | ForEach-Object  {Get-FileHash –Path $_.FullName
-      $failPath = (Compare-Object -ReferenceObject $actualFiles -DifferenceObject $expectedFiles  -Property hash -PassThru).Path
-      if ($failPath) {
-        // Passed $x
-      } else {
-        /! Failed: $failPath
-      }
-    } else {
-      # if there are not expected files yet, produce the originals to compare
+    $tests = @(
+      @{testName = "cs"; fileExtension = "*.cs" },
+      @{testName = "py"; fileExtension = "*.py" },
+      @{testName = "ts"; fileExtension = "*.ts" },
+      @{testName = "java"; fileExtension = "*.java" }
+    )
 
+    if ($allpassed.Contains($x.ToString())) {
+      $tests | ForEach-Object {
+        $test = $_
+        $testName = $test.testName
+        // test name: $testName
+
+        $fileExtension = $test.fileExtension
+        // file extension: $fileExtension
+        
+        # actual data
+        $actualFilesPath = "$out_2\$x\$testName"
+        $actualFiles = Get-ChildItem –Path $actualFilesPath -Filter $fileExtension -Recurse
+        $actualHashes = $actualFiles | ForEach-Object {Get-FileHash –Path $_.FullName}
+
+        # expected data
+        $expectedFilesPath = "$expected_files_dir\$x\$testName"
+        $expectedFiles = Get-ChildItem –Path $expectedFilesPath -Filter $fileExtension -Recurse
+        $expectedHashes =  $expectedFiles | ForEach-Object {Get-FileHash –Path $_.FullName}
+
+        try
+        {
+          $failedPaths =  (Compare-Object -ReferenceObject  $actualHashes -DifferenceObject $expectedHashes  -Property hash -PassThru).Path
+        } catch{
+          /! there was a terminating error. one of the file sets was null
+          $failedPaths = @()
+        }
+       
+        if ($failedPaths) {
+          /! --> "Failed: Different $testName files for test '$x'"
+        } else {
+          // --> "$testName tests for test '$x' passed "
+        }
+      }
+     
+    } else {
       autorest-orig $out_1/$x/cs $file --csharp.output-folder:$out_1/$x/cs  
       autorest-orig $out_1/$x/py $file --python.output-folder:$out_1/$x/py
       autorest-orig $out_1/$x/ts $file --typescript.output-folder:$out_1/$x/ts
       autorest-orig $out_1/$x/java $file --java.output-folder:$out_1/$x/java
-      # autorest-orig $out_1/$x/ruby $file --ruby.output-folder:$out_1/$x/ruby
       autorest-orig $out_1/$x/ars $file --azureresourceschema.output-folder:$out_1/$x/ars
     }
-
+    
+    $x = $x + 1  
   }
 
-  $x = $x + 1  
 
   return;
-<# run all tags 
-  $tags  = get-tags $_
-
-  $tags |% {
-    $tag = $_
-    autorest $file --output-folder:$schemas/$tag --azureresourceschema --tag:$tag
-  }
-  
-#>  
 }
-
-<#
-
-// find files changed in last commit.
-$files = in $restSpecs { git diff-tree --no-commit-id --name-only -r HEAD~1 } 
-$swaggers = @()
-
-$files |% { 
-  $file = "$restSpecs/$_"
-  $content = get-content -raw $file
-  if( $content -match '"swagger": "2.0"' ) {
-    // $file is a swagger file
-    $swaggers += $file 
-  }
-}
-
-$cmd =  @()
-
-$swaggers |% {
-  $swagger = $_
-  # $cmd = $cmd + "--input-file=$( resolve-path $swagger)"
-  => autorest  --input-file=$(resolve-path $swagger)  --output-folder:$schemas --azureresourceschema
-  autorest --input-file=$(resolve-path $swagger) --output-folder:$schemas --azureresourceschema --title:none
-
-}
-
-#=> autorest $cmd --output-folder:$schemas --azureresourceschema
-#autorest $cmd --output-folder:$schemas --azureresourceschema --title:none
-
-
-$newfiles = in $schemas { (git status . -uall).Trim() }
-$newMarkdownFiles = $newfiles | where { $_ -match ".md" }
-$newSchemaFiles = $newfiles | where { $_ -match ".json" }
-
-in $schemas { $newMarkdownFiles |% { remove-item $_ }  }
-#>
-
-# => $allreadmes

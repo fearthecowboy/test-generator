@@ -1,6 +1,6 @@
 
 ## functions
-$autorest_new     = "C:\work\2019\autorest\src\autorest\dist\app"
+$autorest_new     = "C:\Work\autorest\src\autorest\dist\app"
 
 
 function ResolvePath {
