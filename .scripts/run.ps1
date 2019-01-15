@@ -34,11 +34,11 @@ $allreadmes | ForEach-Object {
     $file = $_
 
     # always generate the new files
-    autorest-new $out_2/$x/cs $file --csharp.output-folder:$out_2/$x/cs
-    autorest-new $out_2/$x/py $file --python.output-folder:$out_2/$x/py
-    autorest-new $out_2/$x/ts $file --typescript.output-folder:$out_2/$x/ts
-    autorest-new $out_2/$x/java $file --java.output-folder:$out_2/$x/java
-    autorest-new $out_2/$x/ars $file --azureresourceschema.output-folder:$out_2/$x/ars
+    autorest-new $out_2/$x/cs $file --csharp.output-folder:$out_2/$x/cs --use-compose
+    autorest-new $out_2/$x/py $file --python.output-folder:$out_2/$x/py --use-compose
+    autorest-new $out_2/$x/ts $file --typescript.output-folder:$out_2/$x/ts --use-compose
+    autorest-new $out_2/$x/java $file --java.output-folder:$out_2/$x/java --use-compose
+    autorest-new $out_2/$x/ars $file --azureresourceschema.output-folder:$out_2/$x/ars --use-compose
 
     $tests = @(
       @{testName = "cs"; fileExtension = "*.cs" },
@@ -51,10 +51,8 @@ $allreadmes | ForEach-Object {
       $tests | ForEach-Object {
         $test = $_
         $testName = $test.testName
-        // test name: $testName
 
         $fileExtension = $test.fileExtension
-        // file extension: $fileExtension
         
         # actual data
         $actualFilesPath = "$out_2\$x\$testName"
@@ -82,11 +80,14 @@ $allreadmes | ForEach-Object {
       }
      
     } else {
-      autorest-orig $out_1/$x/cs $file --csharp.output-folder:$out_1/$x/cs  
-      autorest-orig $out_1/$x/py $file --python.output-folder:$out_1/$x/py
-      autorest-orig $out_1/$x/ts $file --typescript.output-folder:$out_1/$x/ts
-      autorest-orig $out_1/$x/java $file --java.output-folder:$out_1/$x/java
-      autorest-orig $out_1/$x/ars $file --azureresourceschema.output-folder:$out_1/$x/ars
+
+      # original just generated when no expected files are present
+      # this will speed the testing process
+      autorest-orig $out_1/$x/cs $file --csharp.output-folder:$out_1/$x/cs 
+      autorest-orig $out_1/$x/py $file --python.output-folder:$out_1/$x/py 
+      autorest-orig $out_1/$x/ts $file --typescript.output-folder:$out_1/$x/ts 
+      autorest-orig $out_1/$x/java $file --java.output-folder:$out_1/$x/java 
+      autorest-orig $out_1/$x/ars $file --azureresourceschema.output-folder:$out_1/$x/ars 
     }
     
     $x = $x + 1  
