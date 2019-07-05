@@ -1,7 +1,10 @@
 
 ## functions
-$autorest_new     = "C:\work\2019\autorest\src\autorest\dist\app"
+$autorest_new           = "C:\work\2019\autorest_new\autorest\src\autorest\dist\app"
+$autorest_new_version   = "C:\work\2019\autorest_new\autorest\src\autorest-core"
 
+$autorest_orig          = "C:\work\2019\autorest_orig\autorest\src\autorest\dist\app"
+$autorest_orig_version  = "C:\work\2019\autorest_orig\autorest\src\autorest-core"
 
 function ResolvePath {
   param (
@@ -40,14 +43,16 @@ function autorest-orig {Param($folder,[parameter(ValueFromRemainingArguments=$tr
   while ((get-cpu) -gt 90 ) { // -nonewline .; sleep 1 }
   // autorest-orig $rgs
   $shh = mkdir -ea 0  $folder 
-  echo "autorest $rgs"  > "$folder\cmdline.txt"  
-  cmd.exe /c start /min cmd /c autorest $rgs '^>' "$folder\stdout.txt"
+  echo "autorest $rgs"  
+  #cmd.exe /c start /min cmd.exe /c node.exe $autorest_orig $rgs '^>' "$folder\stdout.txt"
+  cmd.exe /c start /min cmd.exe /c node.exe $autorest_orig $rgs '^>' "$folder\stdout.txt"
 }
 function autorest-new {Param($folder, [parameter(ValueFromRemainingArguments=$true)] $rgs ) 
   while ((get-cpu) -gt 90 ) { // -nonewline .  ; sleep 1 }
   // autorest-new $rgs
   $shh = mkdir -ea 0  $folder 
-  echo "autorest $rgs"  > "$folder\cmdline.txt"  
+  echo "autorest $rgs" 
+  #cmd.exe /c start /min cmd.exe /c node.exe $autorest_new $rgs '^>' "$folder\stdout.txt"
   cmd.exe /c start /min cmd.exe /c node.exe $autorest_new $rgs '^>' "$folder\stdout.txt"
 }
 
