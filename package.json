@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "pwsh ./.scripts/run.ps1",
+    "clean": "pwsh ./.scripts/clean-files.ps1",
     "clone-repo": "pwsh ./.scripts/clone.ps1"
   },
   "dependencies": {
